@@ -1,0 +1,176 @@
+/* Marinara NPC Manager — styles */
+
+.nm-toggle-btn {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 9000;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 1px solid var(--border, #444);
+  background: var(--primary, #6366f1);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  transition: opacity .15s;
+}
+.nm-toggle-btn:hover { opacity: .85; }
+
+.nm-panel {
+  position: fixed;
+  bottom: 5rem;
+  right: 1.25rem;
+  z-index: 9001;
+  width: 22rem;
+  max-height: 80vh;
+  border: 1px solid var(--border, #444);
+  border-radius: 0.75rem;
+  background: var(--background, #1a1a2e);
+  color: var(--foreground, #e5e5e5);
+  box-shadow: 0 8px 32px rgba(0,0,0,.55);
+  flex-direction: column;
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+  font-size: 0.8125rem;
+}
+
+.nm-wrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 80vh;
+}
+
+.nm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid var(--border, #444);
+  flex-shrink: 0;
+}
+
+.nm-title { font-weight: 600; font-size: 0.875rem; }
+
+.nm-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.75rem;
+}
+
+.nm-error {
+  background: color-mix(in srgb, #ef4444 15%, transparent);
+  border: 1px solid #ef4444;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  margin: 0.5rem 0.75rem 0;
+  font-size: 0.75rem;
+  color: #fca5a5;
+}
+
+/* Buttons */
+.nm-btn, .nm-btn-primary, .nm-btn-secondary, .nm-btn-small, .nm-btn-icon, .nm-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: opacity .15s;
+  padding: 0.375rem 0.625rem;
+}
+.nm-btn-primary {
+  background: var(--primary, #6366f1);
+  color: #fff;
+  border-color: var(--primary, #6366f1);
+}
+.nm-btn-secondary {
+  background: var(--secondary, #2a2a3e);
+  color: var(--foreground, #e5e5e5);
+  border-color: var(--border, #444);
+}
+.nm-btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  background: var(--secondary, #2a2a3e);
+  color: var(--foreground, #e5e5e5);
+  border-color: var(--border, #444);
+}
+.nm-btn-danger { background: #7f1d1d; color: #fca5a5; border-color: #ef4444; }
+.nm-btn-icon { padding: 0.25rem 0.5rem; background: transparent; border-color: var(--border, #444); }
+.nm-close { background: transparent; border: none; color: var(--foreground, #e5e5e5); cursor: pointer; font-size: 1rem; padding: 0 0.25rem; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button:hover:not(:disabled) { opacity: .85; }
+
+/* Toolbar */
+.nm-toolbar {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.625rem;
+}
+
+/* NPC list */
+.nm-npc-list { display: flex; flex-direction: column; gap: 0.375rem; }
+
+.nm-npc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border, #444);
+  border-radius: 0.5rem;
+  background: var(--card, #16213e);
+}
+.nm-npc-row input[type="checkbox"] { flex-shrink: 0; cursor: pointer; accent-color: var(--primary, #6366f1); }
+.nm-npc-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.125rem; }
+.nm-npc-meta { font-size: 0.7rem; color: var(--muted-foreground, #888); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Extract rows */
+.nm-extract-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border, #444);
+  border-radius: 0.5rem;
+  background: var(--card, #16213e);
+  margin-bottom: 0.375rem;
+  position: relative;
+}
+.nm-extract-row .nm-btn-small { position: absolute; top: 0.375rem; right: 0.375rem; }
+.nm-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; border-radius: 0.25rem; padding: 0.1rem 0.375rem; margin-right: 0.375rem; }
+.nm-badge-create { background: #14532d; color: #86efac; }
+.nm-badge-update { background: #1e3a5f; color: #93c5fd; }
+.nm-extract-detail { font-size: 0.7rem; color: var(--muted-foreground, #888); margin-top: 0.25rem; display: flex; flex-direction: column; gap: 0.125rem; }
+
+/* Form */
+.nm-form { display: flex; flex-direction: column; gap: 0.75rem; }
+.nm-field { display: flex; flex-direction: column; gap: 0.25rem; }
+.nm-label { font-size: 0.7rem; font-weight: 500; color: var(--muted-foreground, #888); }
+.nm-input {
+  border: 1px solid var(--border, #444);
+  border-radius: 0.375rem;
+  background: var(--card, #16213e);
+  color: var(--foreground, #e5e5e5);
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8rem;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.nm-input:focus { outline: none; border-color: var(--primary, #6366f1); }
+.nm-textarea { min-height: 4.5rem; resize: vertical; }
+.nm-textarea-tall { min-height: 7rem; resize: vertical; }
+select.nm-input { cursor: pointer; }
+
+.nm-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+.nm-note { font-size: 0.7rem; color: var(--muted-foreground, #888); margin-bottom: 0.5rem; }
+.nm-empty { text-align: center; color: var(--muted-foreground, #888); padding: 1.5rem 0; font-size: 0.8rem; }

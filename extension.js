@@ -57,22 +57,42 @@ async function getMessages(chatId, count) {
   return msgs.slice(-count);
 }
 
+function buildExtractionPrompt(basePrompt, existingNpcs, excludedNames) {
+  const npcsBlock = existingNpcs.length > 0
+    ? `<existing_npcs>\n${existingNpcs.map(n =>
+        `id=${n.id} name="${n.name}"${n.aliases?.length ? ` aliases="${n.aliases.join(", ")}"` : ""}`
+      ).join("\n")}\n</existing_npcs>`
+    : "<existing_npcs>(none)</existing_npcs>";
+  const excludedBlock = excludedNames.length > 0
+    ? `<excluded_characters>\n${excludedNames.join("\n")}\n</excluded_characters>`
+    : "<excluded_characters>(none)</excluded_characters>";
+  return `${basePrompt}\n\n${npcsBlock}\n\n${excludedBlock}`;
+}
+
 async function runExtraction(chatId, existingNpcs, chatCharacterNames, settings) {
-  const prompt = settings.extractionPrompt || DEFAULT_EXTRACTION_PROMPT;
+  const basePrompt = settings.extractionPrompt || DEFAULT_EXTRACTION_PROMPT;
+  const prompt = buildExtractionPrompt(basePrompt, existingNpcs, chatCharacterNames);
+  console.log("[NPC Manager] runExtraction — chatId:", chatId, "existing:", existingNpcs.length, "excluded:", chatCharacterNames);
   const data = await apiFetch(`generate/dryRun`, {
     method: "POST",
     body: JSON.stringify({
       chatId,
-      skipPreset: true,
-      presetText: prompt,
+      promptParts: {
+        presetText: prompt,
+        includePersona: false,
+        includeCharacters: false,
+        includeHistory: true,
+      },
+      userMessage: "Perform the NPC extraction as instructed. Output only valid JSON.",
       streaming: false,
-      injectLorebook: false,
-      injectTrackers: false,
-      injectChatSummary: false,
     }),
   });
+  console.log("[NPC Manager] dryRun raw response:", data);
   const content = typeof data?.content === "string" ? data.content : "";
-  return parseExtractionResult(content, existingNpcs, chatCharacterNames);
+  console.log("[NPC Manager] extracted content string:", content || "(empty)");
+  const updates = parseExtractionResult(content, existingNpcs, chatCharacterNames);
+  console.log("[NPC Manager] parsed updates:", updates);
+  return updates;
 }
 
 async function syncMacro(chatId, npcs, format) {
@@ -115,7 +135,10 @@ async function getChatCharacterNames(chatId) {
         return data?.name ?? c.name ?? "";
       } catch { return c.name ?? ""; }
     }).filter(Boolean);
-  } catch { return []; }
+  } catch (err) {
+    console.warn("[NPC Manager] getChatCharacterNames error:", err);
+    return [];
+  }
 }
 
 // ─── NPC memory formatting ───────────────────────────────────────────────────
@@ -166,7 +189,10 @@ function normalizeString(v) {
 function parseExtractionResult(content, existingNpcs, excludedNames) {
   try {
     const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return [];
+    if (!jsonMatch) {
+      console.warn("[NPC Manager] parseExtractionResult — no JSON object found in content");
+      return [];
+    }
     const parsed = JSON.parse(jsonMatch[0]);
     const updates = Array.isArray(parsed?.updates) ? parsed.updates : [];
     const excluded = new Set(excludedNames.map(n => n.toLowerCase().trim()));
@@ -193,7 +219,10 @@ function parseExtractionResult(content, existingNpcs, excludedNames) {
         description: normalizeString(u.description) ?? (action === "update" ? null : ""),
       }];
     });
-  } catch { return []; }
+  } catch (err) {
+    console.error("[NPC Manager] parseExtractionResult error:", err);
+    return [];
+  }
 }
 
 function applyUpdates(existingNpcs, updates) {
@@ -314,7 +343,7 @@ function buildListView() {
     await doExtract();
   }, "nm-btn-secondary");
   extractBtn.disabled = state.busy;
-  const syncBtn = btn("↑ Sync {{getvar::npc_memory}}", async () => {
+  const syncBtn = btn("↑ Sync {{npc_memory}}", async () => {
     await doSync();
   }, "nm-btn-secondary");
   const settingsBtn = btn("⚙", () => {
@@ -329,7 +358,7 @@ function buildListView() {
   const cid = chatId();
   if (cid) {
     const note = el("div", { class: "nm-note" },
-      `Showing all NPCs. ✓ marks active in this chat for {{getvar::npc_memory}}.`);
+      `Showing all NPCs. ✓ marks active in this chat for {{npc_memory}}.`);
     wrap.appendChild(note);
   }
 
@@ -500,6 +529,10 @@ function buildSettingsView() {
     render();
   }, "nm-btn-primary");
   form.appendChild(saveBtn);
+
+  const clearBtn = btn("Clear all NPCs", async () => { await doClearAllNpcs(); }, "nm-btn-danger nm-btn-clear");
+  form.appendChild(clearBtn);
+
   wrap.appendChild(form);
   return wrap;
 }
@@ -570,6 +603,15 @@ async function doExtract() {
     state.busy = false;
     render();
   }
+}
+
+async function doClearAllNpcs() {
+  if (!confirm(`Delete all ${state.npcs.length} NPC${state.npcs.length !== 1 ? "s" : ""}? This cannot be undone.`)) return;
+  state.npcs = [];
+  state.chatSelections = {};
+  await saveStore({ npcs: [], chatSelections: {} });
+  state.view = "list";
+  render();
 }
 
 async function doSync() {

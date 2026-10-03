@@ -172,5 +172,7 @@ select.nm-input { cursor: pointer; }
 
 .nm-actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
+.nm-btn-clear { width: 100%; margin-top: 0.5rem; }
+
 .nm-note { font-size: 0.7rem; color: var(--muted-foreground, #888); margin-bottom: 0.5rem; }
 .nm-empty { text-align: center; color: var(--muted-foreground, #888); padding: 1.5rem 0; font-size: 0.8rem; }
